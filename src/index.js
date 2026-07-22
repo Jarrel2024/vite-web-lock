@@ -45,7 +45,7 @@ function buildBootstrap(entryPath, saltBase64, cacheKey, opts) {
     .replace('__COOKIE__', opts.cookieName)
     .replace('__DAYS__', String(opts.cookieDays))
     .replace('__ENTRY__', entryPath)
-    .replace('__CACHE__', cacheKey)
+    .replace(/__CACHE__/g, cacheKey)
     .replace('__SALT__', saltBase64)
     .replace('__ITERATIONS__', String(opts.iterations))
     .replace('__IV_LEN__', String(opts.ivLen))
@@ -123,18 +123,14 @@ export function encryptPlugin(options) {
 
       html = html
         .replace(/<script type="module"[^>]*src="[^"]*"[^>]*><\/script>/g, '')
-        .replace(/<link rel="modulepreload"[^>]*>/g, '')
 
       const bootstrapBlock = '<script>' + buildBootstrap(entryPath, saltBase64, cacheKey, opts) + '</script>'
 
-      const titleEnd = html.indexOf('</title>')
       const headEnd = html.indexOf('</head>')
-      if (titleEnd !== -1) {
-        html = html.slice(0, titleEnd + 8) + '\n    ' + bootstrapBlock + html.slice(titleEnd + 8)
-      } else if (headEnd !== -1) {
+      if (headEnd !== -1) {
         html = html.slice(0, headEnd) + '\n    ' + bootstrapBlock + '\n  ' + html.slice(headEnd)
       } else {
-        throw new Error('[encrypt] could not find </title> or </head> to inject bootstrap')
+        throw new Error('[encrypt] could not find </head> to inject bootstrap')
       }
 
       writeFileSync(indexPath, html)
