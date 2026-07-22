@@ -9,10 +9,18 @@
     ".": "./src/index.js"
   },
   "files": [
-    "src"
+    "src",
+    "dist/runtime"
   ],
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
+  },
+  "scripts": {
+    "build": "node scripts/build-runtime.js",
+    "prepare": "node scripts/build-runtime.js"
+  },
+  "dependencies": {
+    "esbuild": "^0.25.0"
   },
   "license": "MIT",
   "repository": {

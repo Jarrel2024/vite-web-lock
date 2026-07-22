@@ -24,7 +24,8 @@ function mergeOptions(user) {
 let bootstrapTemplate = null
 let swTemplate = null
 
-const PLUGIN_DIR = dirname(fileURLToPath(import.meta.url))
+const PACKAGE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const RUNTIME_DIR = resolve(PACKAGE_DIR, 'dist', 'runtime')
 
 function encrypt(plaintext, keyBuffer, ivLen, algorithm) {
   const iv = randomBytes(ivLen)
@@ -40,7 +41,7 @@ function deriveKey(secret, salt, iterations) {
 
 function buildBootstrap(entryPath, saltBase64, cacheKey, opts) {
   if (!bootstrapTemplate) {
-    bootstrapTemplate = readFileSync(resolve(PLUGIN_DIR, 'bootstrap.js'), 'utf-8')
+    bootstrapTemplate = readFileSync(resolve(RUNTIME_DIR, 'bootstrap.js'), 'utf-8')
   }
   return bootstrapTemplate
     .replace('__COOKIE__', opts.cookieName)
@@ -55,7 +56,7 @@ function buildBootstrap(entryPath, saltBase64, cacheKey, opts) {
 
 function buildSW(assetsDirName, ivLen, cacheKey) {
   if (!swTemplate) {
-    swTemplate = readFileSync(resolve(PLUGIN_DIR, 'sw.js'), 'utf-8')
+    swTemplate = readFileSync(resolve(RUNTIME_DIR, 'sw.js'), 'utf-8')
   }
   return swTemplate
     .replace('__ASSETS_DIR__', assetsDirName)
