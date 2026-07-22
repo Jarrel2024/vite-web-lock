@@ -2,7 +2,7 @@ import type { Plugin, ResolvedConfig } from 'vite'
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
 import { resolve, extname, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createHash, pbkdf2Sync, randomBytes, createCipheriv } from 'node:crypto'
+import { createHash, pbkdf2Sync, randomBytes, createCipheriv, type CipherGCM } from 'node:crypto'
 import { loadEnv } from 'vite'
 
 export interface EncryptPluginOptions {
@@ -39,7 +39,7 @@ const PLUGIN_DIR = dirname(fileURLToPath(import.meta.url))
 
 function encrypt(plaintext: Buffer, keyBuffer: Buffer, ivLen: number, algorithm: string): Buffer {
   const iv = randomBytes(ivLen)
-  const cipher = createCipheriv(algorithm, keyBuffer, iv)
+  const cipher = createCipheriv(algorithm, keyBuffer, iv) as CipherGCM
   const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()])
   const tag = cipher.getAuthTag()
   return Buffer.concat([iv, encrypted, tag])
