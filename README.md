@@ -15,7 +15,7 @@ Build-time AES-256-GCM encryption for Vite SPAs. Locks access behind a `?key=` p
 ## Usage
 
 ```bash
-pnpm add github:your-username/vite-web-lock
+pnpm add github:Jarrel2024/vite-web-lock
 ```
 
 ```ts
