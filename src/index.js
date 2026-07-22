@@ -123,6 +123,7 @@ export function encryptPlugin(options) {
 
       html = html
         .replace(/<script type="module"[^>]*src="[^"]*"[^>]*><\/script>/g, '')
+        .replace(/<link rel="modulepreload"[^>]*>/g, '')
 
       const bootstrapBlock = '<script>' + buildBootstrap(entryPath, saltBase64, cacheKey, opts) + '</script>'
 
