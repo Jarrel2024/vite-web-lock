@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Build-time AES-256-GCM encryption plugin for Vite — locks SPA access behind a ?key= password",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.js"
   },
   "files": [
     "src"

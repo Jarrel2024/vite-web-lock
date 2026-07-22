@@ -1,23 +1,24 @@
-import type { Plugin, ResolvedConfig } from 'vite'
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
 import { resolve, extname, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createHash, pbkdf2Sync, randomBytes, createCipheriv, type CipherGCM } from 'node:crypto'
+import { createHash, pbkdf2Sync, randomBytes, createCipheriv } from 'node:crypto'
 import { loadEnv } from 'vite'
 
-export interface EncryptPluginOptions {
-  cookieName?: string
-  cookieDays?: number
-  iterations?: number
-  saltLen?: number
-  ivLen?: number
-  algorithm?: string
-  envKey?: string
-  distDir?: string
-  assetsDir?: string
-}
+/**
+ * @typedef {Object} EncryptPluginOptions
+ * @property {string} [cookieName]
+ * @property {number} [cookieDays]
+ * @property {number} [iterations]
+ * @property {number} [saltLen]
+ * @property {number} [ivLen]
+ * @property {string} [algorithm]
+ * @property {string} [envKey]
+ * @property {string} [distDir]
+ * @property {string} [assetsDir]
+ */
 
-const DEFAULT_OPTIONS: Required<EncryptPluginOptions> = {
+/** @type {Required<EncryptPluginOptions>} */
+const DEFAULT_OPTIONS = {
   cookieName: 'gt_key',
   cookieDays: 30,
   iterations: 100000,
@@ -29,27 +30,53 @@ const DEFAULT_OPTIONS: Required<EncryptPluginOptions> = {
   assetsDir: 'dist/assets',
 }
 
-function mergeOptions(user?: EncryptPluginOptions): Required<EncryptPluginOptions> {
+/**
+ * @param {EncryptPluginOptions} [user]
+ * @returns {Required<EncryptPluginOptions>}
+ */
+function mergeOptions(user) {
   return { ...DEFAULT_OPTIONS, ...user }
 }
 
-let bootstrapTemplate: string | null = null
+/** @type {string | null} */
+let bootstrapTemplate = null
 
 const PLUGIN_DIR = dirname(fileURLToPath(import.meta.url))
 
-function encrypt(plaintext: Buffer, keyBuffer: Buffer, ivLen: number, algorithm: string): Buffer {
+/**
+ * @param {Buffer} plaintext
+ * @param {Buffer} keyBuffer
+ * @param {number} ivLen
+ * @param {string} algorithm
+ * @returns {Buffer}
+ */
+function encrypt(plaintext, keyBuffer, ivLen, algorithm) {
   const iv = randomBytes(ivLen)
-  const cipher = createCipheriv(algorithm, keyBuffer, iv) as CipherGCM
+  /** @type {import('node:crypto').CipherGCM} */
+  const cipher = /** @type {any} */ (createCipheriv(algorithm, keyBuffer, iv))
   const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()])
   const tag = cipher.getAuthTag()
   return Buffer.concat([iv, encrypted, tag])
 }
 
-function deriveKey(secret: string, salt: Buffer, iterations: number): Buffer {
+/**
+ * @param {string} secret
+ * @param {Buffer} salt
+ * @param {number} iterations
+ * @returns {Buffer}
+ */
+function deriveKey(secret, salt, iterations) {
   return pbkdf2Sync(secret, salt, iterations, 32, 'sha256')
 }
 
-function buildBootstrap(entryPath: string, saltBase64: string, cacheKey: string, opts: Required<EncryptPluginOptions>): string {
+/**
+ * @param {string} entryPath
+ * @param {string} saltBase64
+ * @param {string} cacheKey
+ * @param {Required<EncryptPluginOptions>} opts
+ * @returns {string}
+ */
+function buildBootstrap(entryPath, saltBase64, cacheKey, opts) {
   if (!bootstrapTemplate) {
     bootstrapTemplate = readFileSync(resolve(PLUGIN_DIR, 'bootstrap.js'), 'utf-8')
   }
@@ -63,9 +90,14 @@ function buildBootstrap(entryPath: string, saltBase64: string, cacheKey: string,
     .replace('__IV_LEN__', String(opts.ivLen))
 }
 
-export function encryptPlugin(options?: EncryptPluginOptions): Plugin {
+/**
+ * @param {EncryptPluginOptions} [options]
+ * @returns {import('vite').Plugin}
+ */
+export function encryptPlugin(options) {
   const opts = mergeOptions(options)
-  let resolvedConfig: ResolvedConfig
+  /** @type {import('vite').ResolvedConfig} */
+  let resolvedConfig
 
   return {
     name: 'vite-plugin-encrypt',
@@ -102,7 +134,8 @@ export function encryptPlugin(options?: EncryptPluginOptions): Plugin {
         throw new Error('[encrypt] no module entry <script> found in dist/index.html')
       }
 
-      let files: string[]
+      /** @type {string[]} */
+      let files
       try {
         files = readdirSync(assetsDir).filter((f) => extname(f) === '.js')
       } catch {
