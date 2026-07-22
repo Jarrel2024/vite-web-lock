@@ -4,13 +4,15 @@ Build-time AES-256-GCM encryption for Vite SPAs. Locks access behind a `?key=` p
 
 ## How it works
 
-1. At build time, the plugin encrypts the single JS bundle with AES-256-GCM using a PBKDF2-derived key.
-2. It injects an inline bootstrap script into `index.html` that:
+1. At build time, the plugin encrypts every JS chunk with AES-256-GCM using a PBKDF2-derived key.
+2. It generates a Service Worker (`sw.js`) that intercepts and decrypts JS asset requests on-the-fly.
+3. It injects an inline bootstrap script into `index.html` that:
    - Reads the key from `?key=` query param or `gt_key` cookie
    - Derives the AES key via PBKDF2 (same salt, iterations)
-   - Fetches and decrypts the encrypted JS bundle in the browser
-   - Boots the SPA from a blob URL (`<script type="module">`)
-3. No key → static "Access Denied" message. No valid key → decrypt fails → denied.
+   - Registers the Service Worker and passes the derived AES key to it
+   - Injects the original entry module script — the SW transparently decrypts every chunk at fetch time
+   - Boots the SPA as usual
+4. No key → static "Access Denied" message. No valid key → decrypt fails → denied.
 
 ## Usage
 
@@ -26,7 +28,6 @@ import { encryptPlugin } from 'vite-web-lock'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const encrypting = Boolean(env.ENCRYPTION_KEY)
 
   return {
     plugins: [
@@ -36,14 +37,6 @@ export default defineConfig(({ mode }) => {
         cookieDays: 30,
       }),
     ],
-    build: {
-      chunkSizeWarningLimit: encrypting ? 2000 : 1000,
-      rolldownOptions: {
-        output: encrypting
-          ? { codeSplitting: false }
-          : { codeSplitting: { /* ... */ } },
-      },
-    },
   }
 })
 ```
@@ -74,6 +67,6 @@ Consumers access the site via `https://example.com/?key=<ENCRYPTION_KEY>`. The k
 
 ## Caveats
 
-- **Single bundle required** — ES modules bypass `window.fetch` for chunk loading. `codeSplitting: false` is necessary.
+- **Service Worker required** — Code splitting support relies on a Service Worker to intercept and decrypt JS chunks at fetch time. The browser must support Service Workers (`navigator.serviceWorker`).
 - **Cache busting** — Each build generates a random salt; the bootstrap appends `?v=<salt-hash>` to the JS URL to prevent stale cache serving wrong encryption.
 - **Secure context** — The `Secure` cookie flag requires HTTPS. Local dev (`http://localhost`) needs manual override or testing on a Netlify deploy preview.
