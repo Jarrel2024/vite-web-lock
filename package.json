@@ -1,0 +1,21 @@
+{
+  "name": "vite-web-lock",
+  "version": "1.0.0",
+  "description": "Build-time AES-256-GCM encryption plugin for Vite — locks SPA access behind a ?key= password",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jarrel2024/vite-web-lock.git"
+  }
+}
