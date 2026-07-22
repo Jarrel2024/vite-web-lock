@@ -56,6 +56,7 @@ The plugin accepts an optional `EncryptPluginOptions` object:
 | `envKey` | `string` | `'ENCRYPTION_KEY'` | Environment variable name for the encryption secret |
 | `distDir` | `string` | `'dist'` | Output directory relative to project root |
 | `assetsDir` | `string` | `'dist/assets'` | Assets directory (where JS bundles are placed) |
+| `verifyText` | `string` | `'You need verify to access'` | Fallback message when no key is provided |
 
 ## Environment Variables
 

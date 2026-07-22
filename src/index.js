@@ -14,6 +14,7 @@ const DEFAULT_OPTIONS = {
   envKey: 'ENCRYPTION_KEY',
   distDir: 'dist',
   assetsDir: 'dist/assets',
+  verifyText: 'You need verify to access',
 }
 
 function mergeOptions(user) {
@@ -49,6 +50,7 @@ function buildBootstrap(entryPath, saltBase64, cacheKey, opts) {
     .replace('__SALT__', saltBase64)
     .replace('__ITERATIONS__', String(opts.iterations))
     .replace('__IV_LEN__', String(opts.ivLen))
+    .replace('__VERIFY_TEXT__', opts.verifyText)
 }
 
 function buildSW(assetsDirName, ivLen, cacheKey) {

@@ -8,6 +8,7 @@ export interface EncryptPluginOptions {
   envKey?: string
   distDir?: string
   assetsDir?: string
+  verifyText?: string
 }
 
 export function encryptPlugin(options?: EncryptPluginOptions): import('vite').Plugin
