@@ -22,13 +22,11 @@ pnpm add github:Jarrel2024/vite-web-lock
 
 ```ts
 // vite.config.ts
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { encryptPlugin } from 'vite-web-lock'
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-
+export default defineConfig(() => {
   return {
     plugins: [
       vue(),
@@ -62,7 +60,7 @@ The plugin accepts an optional `EncryptPluginOptions` object:
 
 | Variable | Description |
 |----------|-------------|
-| `ENCRYPTION_KEY` | Secret used to derive the AES encryption key. If unset, the plugin skips encryption (dev mode). |
+| `ENCRYPTION_KEY` | Secret used to derive the AES encryption key. If unset, the plugin skips encryption. |
 
 Consumers access the site via `https://example.com/?key=<ENCRYPTION_KEY>`. The key is stored in a `gt_key` cookie for 30 days (SameSite=Strict, Secure).
 
